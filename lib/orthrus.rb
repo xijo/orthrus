@@ -1,11 +1,16 @@
-module Orthrus
+$LOAD_PATH.unshift(File.dirname(__FILE__)) unless $LOAD_PATH.include?(File.dirname(__FILE__))
 
+require 'orthrus/remote_method'
+
+module Orthrus
   def self.included(base)
     base.extend ClassMethods
   end
 
   module ClassMethods
-    
+
+    # Define default settings for the remote connection.
+    # Typically: base_uri, headers with authentication etc
     def remote_defaults(options)
       @remote_defaults ||= {}
       @remote_defaults.merge!(options) if options
@@ -18,9 +23,22 @@ module Orthrus
       child.__send__(:remote_defaults, @remote_defaults)
     end
 
+    def define_remote_method(name, args = {})
+      remote_options = (@remote_defaults || {}).merge(args)
+      @remote_methods ||= {}
+      @remote_methods[name] = RemoteMethod.new(remote_options)
+
+      class_eval <<-SRC
+        def self.#{name.to_s}(args = {})
+          call_remote_method(:#{name.to_s}, args)
+        end
+      SRC
+    end
+
+
     # def remote_proxy_object(url, method, options)
     #   easy = Typhoeus.get_easy_object
-    # 
+    #
     #   easy.url                   = url
     #   easy.method                = method
     #   easy.headers               = options[:headers] if options.has_key?(:headers)
@@ -29,7 +47,7 @@ module Orthrus
     #   easy.request_body          = options[:body] if options[:body]
     #   easy.timeout               = options[:timeout] if options[:timeout]
     #   easy.set_headers
-    # 
+    #
     #   proxy = Typhoeus::RemoteProxyObject.new(clear_memoized_proxy_objects, easy, options)
     #   set_memoized_proxy_object(method, url, options, proxy)
     # end
@@ -73,23 +91,5 @@ module Orthrus
     #   proxy
     # end
     #
-    # def define_remote_method(name, args = {})
-    #   @remote_defaults  ||= {}
-    #   args[:method]     ||= @remote_defaults[:method]
-    #   args[:on_success] ||= @remote_defaults[:on_success]
-    #   args[:on_failure] ||= @remote_defaults[:on_failure]
-    #   args[:base_uri]   ||= @remote_defaults[:base_uri]
-    #   args[:path]       ||= @remote_defaults[:path]
-    #   m = RemoteMethod.new(args)
-    #
-    #   @remote_methods ||= {}
-    #   @remote_methods[name] = m
-    #
-    #   class_eval <<-SRC
-    #     def self.#{name.to_s}(args = {})
-    #       call_remote_method(:#{name.to_s}, args)
-    #     end
-    #   SRC
-    # end
   end
 end
