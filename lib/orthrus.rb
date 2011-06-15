@@ -1,0 +1,3 @@
+module Orthrus
+  # Your code goes here...
+end
