@@ -1,8 +1,8 @@
-$LOAD_PATH.unshift(File.dirname(__FILE__)) unless $LOAD_PATH.include?(File.dirname(__FILE__))
-
 require 'orthrus/remote_method'
 
 module Orthrus
+  # Include Orthrus functionality in the given class
+  # @param base class to include
   def self.included(base)
     base.extend ClassMethods
   end
@@ -10,7 +10,9 @@ module Orthrus
   module ClassMethods
 
     # Define default settings for the remote connection.
-    # Typically: base_uri, headers with authentication etc
+    # @attribute remote_defaults
+    # @param [Hash] options to be set as default
+    # @return [Hash] the current remote default settings
     def remote_defaults(options)
       @remote_defaults ||= {}
       @remote_defaults.merge!(options) if options
@@ -23,8 +25,11 @@ module Orthrus
       child.__send__(:remote_defaults, @remote_defaults)
     end
 
-    def define_remote_method(name, args = {})
-      remote_options = (@remote_defaults || {}).merge(args)
+    # Declare a remote method and create a class method as wrapper
+    # @param [Symbol] name of the remote method
+    # @param [Hash] options for the remote method
+    def define_remote_method(name, options = {})
+      remote_options = (@remote_defaults || {}).merge(options)
       @remote_methods ||= {}
       @remote_methods[name] = RemoteMethod.new(remote_options)
 
@@ -35,61 +40,12 @@ module Orthrus
       SRC
     end
 
-
-    # def remote_proxy_object(url, method, options)
-    #   easy = Typhoeus.get_easy_object
-    #
-    #   easy.url                   = url
-    #   easy.method                = method
-    #   easy.headers               = options[:headers] if options.has_key?(:headers)
-    #   easy.headers["User-Agent"] = (options[:user_agent] || Typhoeus::USER_AGENT)
-    #   easy.params                = options[:params] if options[:params]
-    #   easy.request_body          = options[:body] if options[:body]
-    #   easy.timeout               = options[:timeout] if options[:timeout]
-    #   easy.set_headers
-    #
-    #   proxy = Typhoeus::RemoteProxyObject.new(clear_memoized_proxy_objects, easy, options)
-    #   set_memoized_proxy_object(method, url, options, proxy)
-    # end
-
-    # def call_remote_method(method_name, args)
-    #   m = @remote_methods[method_name]
-    #
-    #   base_uri = args.delete(:base_uri) || m.base_uri || ""
-    #
-    #   if args.has_key? :path
-    #     path = args.delete(:path)
-    #   else
-    #     path = m.interpolate_path_with_arguments(args)
-    #   end
-    #   path ||= ""
-    #
-    #   http_method = m.http_method
-    #   url         = base_uri + path
-    #   options     = m.merge_options(args)
-    #
-    #   # proxy_object = memoized_proxy_object(http_method, url, options)
-    #   # return proxy_object unless proxy_object.nil?
-    #   #
-    #   # if m.cache_responses?
-    #   #   object = @cache.get(get_memcache_response_key(method_name, args))
-    #   #   if object
-    #   #     set_memoized_proxy_object(http_method, url, options, object)
-    #   #     return object
-    #   #   end
-    #   # end
-    #
-    #   proxy = memoized_proxy_object(http_method, url, options)
-    #   unless proxy
-    #     if m.cache_responses?
-    #       options[:cache] = @cache
-    #       options[:cache_key] = get_memcache_response_key(method_name, args)
-    #       options[:cache_timeout] = m.cache_ttl
-    #     end
-    #     proxy = send(http_method, url, options)
-    #   end
-    #   proxy
-    # end
-    #
+    # Find the specified remote method and pass the arguments
+    # @param [Symbol] method_name to identify the remote method
+    # @param [Hash] args to pass through
+    def call_remote_method(method_name, args)
+      remote_method = @remote_methods[method_name]
+      remote_method.run(args)
+    end
   end
 end

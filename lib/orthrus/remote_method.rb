@@ -1,94 +1,58 @@
 module Orthrus
   class RemoteMethod
-    attr_accessor :http_method, :options, :base_uri, :path, :on_success, :on_failure
+    attr_accessor :options, :base_uri, :path, :on_success, :on_failure
 
+    # Extract request options to class variables. All other options
+    # will be passed through to Typhoeus.
+    # @param [Hash] options for the request
     def initialize(options = {})
-      @http_method       = options.delete(:method) || :get
-      @options           = options
-      @base_uri          = options.delete(:base_uri)
-      @path              = options.delete(:path)
-      @on_success        = options[:on_success]
-      @on_failure        = options[:on_failure]
+      options[:method] ||= :get
+      @options     = options
+      @base_uri    = options.delete(:base_uri)
+      @path        = options.delete(:path)
+      @on_success  = options[:on_success] || lambda { |response| response }
+      @on_failure  = options[:on_failure] || lambda { |response| response }
     end
 
-    # def args_options_key(args, options)
-    #   "#{args.to_s}+#{options.to_s}"
-    # end
-    #
-    # def calling(args, options)
-    #   @called_methods[args_options_key(args, options)] = true
-    # end
-    #
-    # def already_called?(args, options)
-    #   @called_methods.has_key? args_options_key(args, options)
-    # end
-    #
-    # def add_response_block(block, args, options)
-    #   @response_blocks[args_options_key(args, options)] << block
-    # end
+    # Perform the request, handle response and return the result
+    # @param [Hash] args for interpolation and request options
+    # @return [Response, Object] the Typhoeus::Response or the result of the on_complete block
+    def run(args = {})
+      url     = base_uri + interpolated_path(args)
+      request = Typhoeus::Request.new(url, @options.merge(args))
+      handle_response(request)
+      Typhoeus::Hydra.hydra.queue request
+      Typhoeus::Hydra.hydra.run
+      request.handled_response
+    end
 
-    # def call_response_blocks(result, args, options)
-    #   key = args_options_key(args, options)
-    #   @response_blocks[key].each {|block| block.call(result)}
-    #   @response_blocks.delete(key)
-    #   @called_methods.delete(key)
-    # end
-    #
-    # def clear_cache
-    #   @response_blocks  = Hash.new {|h, k| h[k] = []}
-    #   @called_methods   = {}
-    # end
+    # Interpolate parts of the path marked through color
+    # @param [Hash] args to perform interpolation
+    # @return [String] the interpolated path
+    # @example Interpolate a path
+    #   path = "/planet/:identifier"
+    #   interpolated_path({:identifier => "mars"}) #=> "/planet/mars"
+    def interpolated_path(args = {})
+      interpolated_path = @path
+      args.each do |key, value|
+        if interpolated_path.include?(":#{key}")
+          interpolated_path.sub!(":#{key}", value.to_s)
+          args.delete(key)
+        end
+      end
+      interpolated_path
+    end
 
-    # def merge_options(new_options)
-    #   merged = options.merge(new_options)
-    #   if options.has_key?(:params) && new_options.has_key?(:params)
-    #     merged[:params] = options[:params].merge(new_options[:params])
-    #   end
-    #   argument_names.each {|a| merged.delete(a)}
-    #   merged.delete(:on_success) if merged[:on_success].nil?
-    #   merged.delete(:on_failure) if merged[:on_failure].nil?
-    #   merged
-    # end
-
-    # def interpolate_path_with_arguments(args)
-    #   interpolated_path = @path
-    #   argument_names.each do |arg|
-    #     interpolated_path = interpolated_path.gsub(":#{arg}", args[arg].to_s)
-    #   end
-    #   interpolated_path
-    # end
-
-    # def argument_names
-    #   return @keys if @keys
-    #   pattern, keys = compile(@path)
-    #   @keys = keys.collect {|k| k.to_sym}
-    # end
-
-    # rippped from Sinatra. clean up stuff we don't need later
-    # def compile(path)
-    #   path ||= ""
-    #   keys = []
-    #   if path.respond_to? :to_str
-    #     special_chars = %w{. + ( )}
-    #     pattern =
-    #       path.gsub(/((:\w+)|[\*#{special_chars.join}])/) do |match|
-    #         case match
-    #         when "*"
-    #           keys << 'splat'
-    #           "(.*?)"
-    #         when *special_chars
-    #           Regexp.escape(match)
-    #         else
-    #           keys << $2[1..-1]
-    #           "([^/?&#]+)"
-    #         end
-    #       end
-    #     [/^#{pattern}$/, keys]
-    #   elsif path.respond_to? :match
-    #     [path, keys]
-    #   else
-    #     raise TypeError, path
-    #   end
-    # end
+    # Call success and failure handler on request complete
+    # @param [Typhoeus::Request] request that needs success or failure handling
+    def handle_response(request)
+      request.on_complete do |response|
+        if response.success?
+          @on_success.call(response)
+        else
+          @on_failure.call(response)
+        end
+      end
+    end
   end
 end
