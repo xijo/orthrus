@@ -1,4 +1,5 @@
 require 'orthrus/remote_method'
+require 'orthrus/remote_options'
 
 module Orthrus
   # Include Orthrus functionality in the given class
@@ -8,30 +9,32 @@ module Orthrus
   end
 
   module ClassMethods
+    # Getter for remote options
+    # @return [RemoteOptions] the remote options for this class
+    def remote_options
+      @remote_options ||= RemoteOptions.new
+    end
 
     # Define default settings for the remote connection.
     # @attribute remote_defaults
     # @param [Hash] options to be set as default
     # @return [Hash] the current remote default settings
     def remote_defaults(options)
-      @remote_defaults ||= {}
-      @remote_defaults.merge!(options) if options
-      @remote_defaults
+      remote_options.smart_merge!(options)
     end
 
     # If we get subclassed, make sure that child inherits the remote defaults
     # of the parent class.
     def inherited(child)
-      child.__send__(:remote_defaults, @remote_defaults)
+      child.__send__(:remote_defaults, remote_options)
     end
 
     # Declare a remote method and create a class method as wrapper
     # @param [Symbol] name of the remote method
     # @param [Hash] options for the remote method
     def define_remote_method(name, options = {})
-      remote_options = (@remote_defaults || {}).merge(options)
       @remote_methods ||= {}
-      @remote_methods[name] = RemoteMethod.new(remote_options)
+      @remote_methods[name] = RemoteMethod.new(remote_options.smart_merge(options))
 
       class_eval <<-SRC
         def self.#{name.to_s}(args = {})
