@@ -18,8 +18,9 @@ module Orthrus
     # @param [Hash] args for interpolation and request options
     # @return [Response, Object] the Typhoeus::Response or the result of the on_complete block
     def run(args = {})
-      url     = base_uri + interpolated_path(args)
-      request = Typhoeus::Request.new(url, @options.smart_merge(args))
+      options = @options.smart_merge(args)
+      url     = base_uri + interpolated_path(options)
+      request = Typhoeus::Request.new(url, options)
       handle_response(request)
       Typhoeus::Hydra.hydra.queue request
       Typhoeus::Hydra.hydra.run
