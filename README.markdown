@@ -21,7 +21,7 @@ easy interface to work with.
 
 ## Usage
 
-*Simple: OpenLibrary Example*
+### Simple Example: OpenLibrary
 
     require 'rubygems'
     require 'typhoeus'
@@ -29,15 +29,15 @@ easy interface to work with.
 
     class OpenLibrary
       include Orthrus
-      remote_defaults :base_uri => "http://openlibrary.org/api"
+      remote_defaults :base_uri => "http://openlibrary.org/api", :format => "json"
 
       define_remote_method :book, :path => '/books'
     end
 
-    book = OpenLibrary.book(:params => {:bibkeys => "ISBN:0451526538", :format => "json"})
+    book = OpenLibrary.book(:params => {:bibkeys => "ISBN:0451526538"})
     puts book.inspect # Typhoeus::Response
 
-*Advanced: Twitter Example with JSON handling and path interpolation*
+### Advanced: Twitter Example with JSON handling and path interpolation
 
     require 'rubygems'
     require 'typhoeus'
@@ -66,10 +66,37 @@ easy interface to work with.
     # Submit a tweet. Authentication skipped in example.
     Twitter.tweet(:params => {:status => "I #love #planets! :)"})
 
+
+### Hydra
+
+To use Typhoeus' hydra to perform multiple request parallel, you can set the `return_request` option
+in `remote_defaults`, `define_remote_method` or even on per request basis to `true`.
+Orthrus will return the crafted Typhoeus::Request, including the success and error handling.
+
+    require 'rubygems'
+    require 'typhoeus'
+    require 'orthrus'
+
+    class WeatherInformation
+      include Orthrus
+      remote_defaults :base_uri       => "http://wackyweather.test",
+                      :return_request => true
+
+      define_remote_method :city, :path => "/city/:name"
+    end
+
+    hydra = Typhoeus::Hydra.new
+    hydra.queue new_york = WeatherInformation.city(:name => "new_york")
+    hydra.queue berlin   = WeatherInformation.city(:name => "berlin")
+    hydra.run
+
+    puts berlin.handled_response
+
+For more information about the hydra feature, visit: http://github.com/dbalatero/typhoeus
+
 ## TODO
 
  - no cache handling yet.
- - make requests hydra-compatible
 
 ## Author
 

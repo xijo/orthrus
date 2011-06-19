@@ -22,9 +22,13 @@ module Orthrus
       url     = base_uri + interpolated_path(options)
       request = Typhoeus::Request.new(url, options)
       handle_response(request)
-      Typhoeus::Hydra.hydra.queue request
-      Typhoeus::Hydra.hydra.run
-      request.handled_response
+      if options[:return_request]
+        request
+      else
+        Typhoeus::Hydra.hydra.queue request
+        Typhoeus::Hydra.hydra.run
+        request.handled_response
+      end
     end
 
     # Interpolate parts of the path marked through color

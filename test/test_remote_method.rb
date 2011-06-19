@@ -68,4 +68,13 @@ class TestDefineRemoteMethod < Test::Unit::TestCase
     response = remote_method.run(:body => '{"planet":"naboo"}')
     assert_equal "Creating planets is not your business!", response.body
   end
+
+  def test_remote_method_returns_request
+    remote_method = Orthrus::RemoteMethod.new(
+      :base_uri       => "http://astronomical.test",
+      :path           => "/planets",
+      :return_request => true
+    )
+    assert_instance_of Typhoeus::Request, remote_method.run
+  end
 end
