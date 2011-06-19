@@ -21,6 +21,9 @@ easy interface to work with.
 
 ## Usage
 
+In general, Orthrus will accept all options that Typhoeus does. Here are some
+examples how to use it:
+
 ### Simple Example: OpenLibrary
 
     require 'rubygems'

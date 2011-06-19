@@ -38,10 +38,10 @@ class TestDefineRemoteMethod < Test::Unit::TestCase
 
   def test_remote_method_with_success_handler
     remote_method = Orthrus::RemoteMethod.new(
-      :base_uri => "http://astronomical.test",
-      :path     => "/planets/:identifier",
+      :base_uri   => "http://astronomical.test",
+      :path       => "/planets/:identifier",
       :on_success => lambda { |response| JSON.parse(response.body) },
-      :method   => :get
+      :method     => :get
     )
     response = remote_method.run(:identifier => :mars)
     assert_equal '3.9335 g/cm3', response['mars']['density']
