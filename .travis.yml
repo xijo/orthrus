@@ -4,6 +4,8 @@ rvm:
   - ree
   - jruby
 
+script: "bundle exec rake test"
+
 notifications:
   disabled: false
   recipients:
