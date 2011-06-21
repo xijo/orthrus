@@ -17,7 +17,7 @@ easy interface to work with. All of its functionality is covered by tests as wel
 
 ![orthrus build status][1]
 
- [1]:[http://travis-ci.org/xijo/orthrus.png]
+ [1]:http://travis-ci.org/xijo/orthrus.png
 
 ## Installation
 
