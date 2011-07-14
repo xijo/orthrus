@@ -38,7 +38,7 @@ module Orthrus
     #   path = "/planet/:identifier"
     #   interpolated_path({:identifier => "mars"}) #=> "/planet/mars"
     def interpolated_path(args = {})
-      interpolated_path = @path
+      interpolated_path = @path || ""
       args.each do |key, value|
         if interpolated_path.include?(":#{key}")
           interpolated_path.sub!(":#{key}", value.to_s)
