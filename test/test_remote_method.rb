@@ -35,6 +35,14 @@ class TestDefineRemoteMethod < Test::Unit::TestCase
     )
     assert_equal @mars_response.body, remote_method.run(:identifier => :mars).body
   end
+  
+  def test_remote_method_with_empty_path
+    remote_method = Orthrus::RemoteMethod.new(
+      :base_uri => "http://astronomical.test/planets/mars",
+      :method   => :get
+    )
+    assert_equal @mars_response.body, remote_method.run(:identifier => :mars).body
+  end
 
   def test_remote_method_with_success_handler
     remote_method = Orthrus::RemoteMethod.new(
