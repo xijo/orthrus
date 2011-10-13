@@ -3,9 +3,9 @@ require 'test_helper'
 class TestDefineRemoteMethod < Test::Unit::TestCase
 
   def test_path_interpolation
-    remote_method = Orthrus::RemoteMethod.new :path => "/some/:id/with/:child"
+    remote_method = Orthrus::RemoteMethod.new
     args = { :id => 4, :child => 2, :another => 3 }
-    interpolated  = remote_method.interpolated_path(args)
+    interpolated  = remote_method.interpolate('/some/:id/with/:child', args)
     assert_equal "/some/4/with/2", interpolated
     assert_equal({ :another => 3 }, args)
   end
@@ -35,7 +35,7 @@ class TestDefineRemoteMethod < Test::Unit::TestCase
     )
     assert_equal @mars_response.body, remote_method.run(:identifier => :mars).body
   end
-  
+
   def test_remote_method_with_empty_path
     remote_method = Orthrus::RemoteMethod.new(
       :base_uri => "http://astronomical.test/planets/mars",

@@ -9,7 +9,7 @@ module Orthrus
       options[:method] ||= :get
       @options    = options === RemoteOptions ? options : RemoteOptions.new(options)
       @base_uri   = options.delete(:base_uri)
-      @path       = options.delete(:path)
+      @path       = options.delete(:path) || ""
       @on_success = options[:on_success] || lambda { |response| response }
       @on_failure = options[:on_failure] || lambda { |response| response }
     end
@@ -19,7 +19,7 @@ module Orthrus
     # @return [Response, Object] the Typhoeus::Response or the result of the on_complete block
     def run(args = {})
       options = @options.smart_merge(args)
-      url     = base_uri + interpolated_path(options)
+      url     = interpolate(base_uri + path, options)
       request = Typhoeus::Request.new(url, options)
       handle_response(request)
       if options[:return_request]
@@ -31,21 +31,21 @@ module Orthrus
       end
     end
 
-    # Interpolate parts of the path marked through color
+    # Interpolate parts of the given url which are marked by colon
+    # @param [String] url to be interpolated
     # @param [Hash] args to perform interpolation
-    # @return [String] the interpolated path
-    # @example Interpolate a path
-    #   path = "/planet/:identifier"
-    #   interpolated_path({:identifier => "mars"}) #=> "/planet/mars"
-    def interpolated_path(args = {})
-      interpolated_path = @path || ""
+    # @return [String] the interpolated url
+    # @example Interpolate a url
+    #   interpolate("http://example.com/planet/:identifier", {:identifier => "mars"}) #=> "http://example.com/planet/mars"
+    def interpolate(url, args = {})
+      result = url
       args.each do |key, value|
-        if interpolated_path.include?(":#{key}")
-          interpolated_path.sub!(":#{key}", value.to_s)
+        if result.include?(":#{key}")
+          result.sub!(":#{key}", value.to_s)
           args.delete(key)
         end
       end
-      interpolated_path
+      result
     end
 
     # Call success and failure handler on request complete
