@@ -6,6 +6,8 @@ rvm:
 
 script: "bundle exec rake test"
 
+env: JRUBY_OPTS=”–server -Dnative.enabled=true”
+
 notifications:
   disabled: false
   recipients:
