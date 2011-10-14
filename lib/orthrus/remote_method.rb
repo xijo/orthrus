@@ -12,6 +12,7 @@ module Orthrus
       @path       = options.delete(:path) || ""
       @on_success = options[:on_success] || lambda { |response| response }
       @on_failure = options[:on_failure] || lambda { |response| response }
+      @debug      = options.delete(:debug)
     end
 
     # Perform the request, handle response and return the result
@@ -21,6 +22,7 @@ module Orthrus
       options = @options.smart_merge(args)
       url     = interpolate(base_uri + path, options)
       request = Typhoeus::Request.new(url, options)
+      Orthrus::Logger.debug("request to #{url}\n  with options #{options.inspect}") if @debug
       handle_response(request)
       if options[:return_request]
         request
@@ -45,6 +47,7 @@ module Orthrus
           args.delete(key)
         end
       end
+      Orthrus::Logger.debug("interpolation result is #{result}") if @debug
       result
     end
 

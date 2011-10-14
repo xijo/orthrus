@@ -1,5 +1,6 @@
 require 'orthrus/remote_method'
 require 'orthrus/remote_options'
+require 'orthrus/logger'
 
 module Orthrus
   # Include Orthrus functionality in the given class
