@@ -34,6 +34,7 @@ class TestDefineRemoteMethod < Test::Unit::TestCase
       :method   => :get
     )
     assert_equal @mars_response.body, remote_method.run(:identifier => :mars).body
+    assert_equal @moon_response.body, remote_method.run(:identifier => :moon).body
   end
 
   def test_remote_method_with_empty_path
