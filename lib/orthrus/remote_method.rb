@@ -40,7 +40,7 @@ module Orthrus
     # @example Interpolate a url
     #   interpolate("http://example.com/planet/:identifier", {:identifier => "mars"}) #=> "http://example.com/planet/mars"
     def interpolate(url, args = {})
-      result = url
+      result = url.dup
       args.each do |key, value|
         if result.include?(":#{key}")
           result.sub!(":#{key}", value.to_s)
