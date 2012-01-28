@@ -13,12 +13,14 @@ Gem::Specification.new do |s|
   s.description = %q{Orthrus extends Typhoeus with remote method handling, since it is deprecated in Typhoeus itself.}
 
   s.files         = `git ls-files`.split("\n")
-  s.test_files    = `git ls-files -- test/*`.split("\n")
+  s.test_files    = `git ls-files -- spec/*`.split("\n")
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
 
   s.add_runtime_dependency 'typhoeus', '~> 0.2'
 
-  s.add_development_dependency 'test-unit', '~> 2.3'
+  #s.add_development_dependency 'test-unit', '~> 2.3'
   s.add_development_dependency 'json', '~> 1.5'
+  s.add_development_dependency 'rspec'
+  s.add_development_dependency 'simplecov'
 end

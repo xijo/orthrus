@@ -33,9 +33,13 @@ module Orthrus
     # Declare a remote method and create a class method as wrapper
     # @param [Symbol] name of the remote method
     # @param [Hash] options for the remote method
-    def define_remote_method(name, options = {})
+    def define_remote_method(name, options = {}, &block)
+      method_options = remote_options.dup
+      method_options.stack << options unless options.empty?
+      method_options.stack << block if block_given?
+
       @remote_methods ||= {}
-      @remote_methods[name] = RemoteMethod.new(remote_options.smart_merge(options))
+      @remote_methods[name] = RemoteMethod.new(method_options)
 
       class_eval <<-SRC
         def self.#{name.to_s}(args = {})
@@ -48,8 +52,15 @@ module Orthrus
     # @param [Symbol] method_name to identify the remote method
     # @param [Hash] args to pass through
     def call_remote_method(method_name, args)
+
       remote_method = @remote_methods[method_name]
       remote_method.run(args)
+    end
+
+    def remote_method_defaults(args = {}, &block)
+      remote_options.stack << args unless args.empty?
+      remote_options.stack << block if block_given?
+      remote_options
     end
   end
 end

@@ -1,8 +1,25 @@
 module Orthrus
   class RemoteOptions < Hash
+
+    attr_accessor :stack, :built
+
+    def build
+      built and return self
+      while !stack.empty? do
+        case element = stack.shift
+          when Proc then smart_merge!(element.call)
+          when Hash then smart_merge!(element)
+        end
+      end
+      self.built = true
+      self
+    end
+
     # @param [Hash] options to be set as remote options
     def initialize(options = {})
-      replace(options)
+      @stack = []
+      @built = false
+      @stack << options unless options.empty?
     end
 
     # Merge the given hash and its subhashes.

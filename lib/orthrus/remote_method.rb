@@ -1,28 +1,35 @@
 module Orthrus
   class RemoteMethod
-    attr_accessor :options, :base_uri, :path, :on_success, :on_failure
+    attr_accessor :options, :base_uri, :path, :on_success, :on_failure, :prepared
 
     # Extract request options to class variables. All other options
     # will be passed through to Typhoeus.
     # @param [Hash] options for the request
-    def initialize(options = {})
+    def initialize(args = {})
+      self.options = args === RemoteOptions ? args : RemoteOptions.new(args)
+      self.prepared = false
+    end
+
+    def prepare_method
+      options.build
       options[:method] ||= :get
-      @options    = options === RemoteOptions ? options : RemoteOptions.new(options)
-      @base_uri   = options.delete(:base_uri)
-      @path       = options.delete(:path) || ""
-      @on_success = options[:on_success] || lambda { |response| response }
-      @on_failure = options[:on_failure] || lambda { |response| response }
-      @debug      = options.delete(:debug)
+      self.base_uri   = options.delete(:base_uri)
+      self.path       = options.delete(:path) || ""
+      self.on_success = options[:on_success] || lambda { |response| response }
+      self.on_failure = options[:on_failure] || lambda { |response| response }
+      # self.debug      = options.delete(:debug)
+      self.prepared   = true
     end
 
     # Perform the request, handle response and return the result
     # @param [Hash] args for interpolation and request options
     # @return [Response, Object] the Typhoeus::Response or the result of the on_complete block
     def run(args = {})
-      options = @options.smart_merge(args)
-      url     = interpolate(base_uri + path, options)
-      request = Typhoeus::Request.new(url, options)
-      Orthrus::Logger.debug("request to #{url}\n  with options #{options.inspect}") if @debug
+      prepared or prepare_method
+      request_options = options.smart_merge(args)
+      url             = interpolate(base_uri + path, request_options)
+      request         = Typhoeus::Request.new(url, request_options)
+      Orthrus::Logger.debug("request to #{url}\n  with options #{request_options.inspect}") if @debug
       handle_response(request)
       if options[:return_request]
         request
@@ -56,9 +63,9 @@ module Orthrus
     def handle_response(request)
       request.on_complete do |response|
         if response.success?
-          @on_success.call(response)
+          on_success.call(response)
         else
-          @on_failure.call(response)
+          on_failure.call(response)
         end
       end
     end
