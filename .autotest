@@ -2,13 +2,26 @@
 #require 'redgreen'
 #require 'autotest/timestamp'
 
-Autotest.add_hook(:initialize) {|at|
-  at.add_exception %r{^\.git}  # ignore Version Control System
-  at.add_exception %r{^./tmp}  # ignore temp files, lest autotest will run again, and again...
-  #  at.clear_mappings         # take out the default (test/test*rb)
-  at.add_mapping(%r{^lib/.*\.rb$}) {|f, _|
-    Dir['spec/**/*_spec.rb']
-  }
-  nil
-}
+Autotest.add_hook(:initialize) do |at|
+
+  # puts 'blablabla'
+
+  # at.add_exception %r{^\.git}  # ignore Version Control System
+  # at.add_exception %r{^./tmp}  # ignore temp files, lest autotest will run again, and again...
+
+  # at.add_mapping(%r{^lib/orthrus/.*\.rb$}) do |f, m|
+  #   possible = File.basename(m[1])
+  #   puts possible
+  #   at.files_matching %r%^spec/.*#{possible}_spec\.rb$%
+  # end
+
+  # puts at.instance_variable_get :@test_mappings
+
+  # at.add_mapping(%r{^lib/.*\.rb$}) {|f, _|
+  #   Dir['spec/**/*.rb']
+  # }
+
+  # nil
+
+end
 

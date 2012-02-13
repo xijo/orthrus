@@ -6,7 +6,7 @@ module Orthrus
     # will be passed through to Typhoeus.
     # @param [Hash] options for the request
     def initialize(args = {})
-      self.options = args === RemoteOptions ? args : RemoteOptions.new(args)
+      self.options = args.kind_of?(RemoteOptions) ? args : RemoteOptions.new(args)
       self.prepared = false
     end
 

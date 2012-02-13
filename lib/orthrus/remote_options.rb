@@ -8,6 +8,12 @@ module Orthrus
 
     attr_accessor :stack, :built
 
+    def dup_with_stack
+      copy = RemoteOptions.new
+      copy.stack = stack.map(&:clone)
+      copy
+    end
+
     def build
       built and return self
       while !stack.empty? do
@@ -48,6 +54,10 @@ module Orthrus
     # @params (@see #deep_merge)
     def smart_merge!(other_hash)
       replace(smart_merge(other_hash))
+    end
+
+    def to_s
+      "#{super}: #{stack.size} stack entries"
     end
   end
 end

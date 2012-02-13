@@ -7,43 +7,38 @@ describe Orthrus do
     options.should_not be_nil
     options.stack.should_not be_empty
     options.build
-    puts options.stack.inspect
-    # options[:base_uri].should == "http://astronomical.test"
-    # options[:params][:format].should == "json"
-    # options[:headers][:authentication].should == "Basic authentication"
-    # assert_equal "http://astronomical.test", defaults[:base_uri]
-    # assert_equal "Basic authentication", defaults[:headers][:authentication]
-    # assert_equal "json", defaults[:params][:format]
+    options[:base_uri].should == "http://astronomy.test"
+    options[:http].should == { :authentication => 'Basic authentication' }
+    options[:params].should == { :format => "json" }
   end
 
-  it "description" do
-    options = Rock.instance_variable_get :@remote_options
-    puts options.stack.inspect
-    puts options.inspect
+  it "should inherit remote default options" do
+    options = Rock.instance_variable_get(:@remote_options)
+    options.should_not be_nil
+    options.stack.should_not be_empty
+    options.build
+    options[:base_uri].should == "http://astronomy.test/rocks"
+    options[:http].should == { :authentication => 'Basic authentication' }
+    options[:params].should == { :format => "json" }
+  end
+
+  it "should define remote methods" do
+    Planet.should respond_to(:find_by_identifier)
+    Planet.should respond_to(:all)
+    Planet.instance_variable_get(:@remote_methods).keys.size.should == 2
+  end
+
+  it "should assign remote options to remote methods correctly" do
+    methods = Planet.instance_variable_get(:@remote_methods)
+
+    find_by_identifier = methods[:find_by_identifier]
+    find_by_identifier.options.build
+    find_by_identifier.options[:path].should == 'planets/:identifier'
+    find_by_identifier.options[:params].should == { :include_details => true, :format => 'json' }
+
+    all = methods[:all]
+    all.options.build
+    all.options[:path].should == 'planets'
   end
 
 end
-
-# require 'test_helper'
-
-# class TestClassMethods < Test::Unit::TestCase
-
-#   def test_setting_remote_defaults
-#     assert_not_nil defaults = Astronomy.instance_variable_get(:@remote_options)
-#     assert_equal "http://astronomical.test", defaults[:base_uri]
-#     assert_equal "Basic authentication", defaults[:headers][:authentication]
-#     assert_equal "json", defaults[:params][:format]
-#   end
-
-#   def test_overwritting_remote_defaults_in_subclass
-#     assert_not_nil defaults = Biology.instance_variable_get(:@remote_options)
-#     assert_equal "http://biological.test", defaults[:base_uri]
-#     assert_equal "Basic authentication", defaults[:headers][:authentication]
-#     assert_equal "json", defaults[:params][:format]
-#     assert_equal false, defaults[:params][:boring]
-#   end
-
-#   def test_define_remote_method
-#     assert Astronomy.respond_to? :find
-#   end
-# end

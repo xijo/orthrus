@@ -35,17 +35,18 @@ class Planet
   include Orthrus
 
   remote_method_defaults do |config|
-    config.http  = { :authentication => "Basic authentication" }
+    config.http     = { :authentication => "Basic authentication" }
     config.base_uri = "http://astronomy.test"
-    config.params   = { :format => "json" }
   end
 
-  define_remote_method :show do |method|
+  remote_method_defaults :params => { :format => "json" }
+
+  define_remote_method :find_by_identifier do |method|
     method.path   = "planets/:identifier"
     method.params = { :include_details => true }
   end
 
-  define_remote_method :index, :path => 'planets'
+  define_remote_method :all, :path => 'planets'
 end
 
 class Rock < Planet
