@@ -21,7 +21,7 @@ namespace :spec do
   end
 
   desc "Run all specs with coverage"
-  task simplecov: [ :'spec:start_simplecov', :spec ]
+  task :simplecov => [ :'spec:start_simplecov', :spec ]
 
   namespace :simplecov do
     desc "Clean all coverage files"
@@ -30,7 +30,7 @@ namespace :spec do
     end
 
     desc "Run all specs and open the result in browser"
-    task view: :'spec:simplecov' do
+    task :view => :'spec:simplecov' do
       system 'gnome-open coverage/index.html'
     end
   end
