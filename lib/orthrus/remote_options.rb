@@ -1,4 +1,9 @@
+require 'ostruct'
+
 module Orthrus
+  # The RemoteOptions class extends a hash by implementing a
+  # deep merge functionality and holding a options stack, which
+  # is used to build the options in the given order
   class RemoteOptions < Hash
 
     attr_accessor :stack, :built
@@ -7,12 +12,19 @@ module Orthrus
       built and return self
       while !stack.empty? do
         case element = stack.shift
-          when Proc then smart_merge!(element.call)
+          when Proc then smart_merge!(proc_to_hash(element))
           when Hash then smart_merge!(element)
         end
       end
       self.built = true
       self
+    end
+
+    #
+    def proc_to_hash(element)
+      struct = OpenStruct.new
+      element.call struct
+      struct.instance_variable_get :@table
     end
 
     # @param [Hash] options to be set as remote options

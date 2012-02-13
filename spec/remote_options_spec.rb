@@ -12,12 +12,22 @@ describe Orthrus::RemoteOptions do
 
   it "should build options from the stack" do
     remote_options = Orthrus::RemoteOptions.new
-    remote_options.stack << lambda { { :foo => :bar } }
+    remote_options.stack << lambda { |c| c.foo = "bar" }
     remote_options.stack << { :labra => :doodle }
     remote_options.stack << { :foo => :foo }
-    remote_options.stack << lambda { { :labra => :dabra } }
+    remote_options.stack << lambda { |c| c.labra = :dabra }
     remote_options.stack << "ignore_me!"
     remote_options.build.should == { :foo => :foo, :labra => :dabra }
+  end
+
+  it "should add the initial parameters to its stack" do
+    option = Orthrus::RemoteOptions.new(:foo => :bar)
+  end
+    def test_remote_options_init
+    remote_options = Orthrus::RemoteOptions.new(:base_uri => "http://astronomical.joe", :params => {:format => :json})
+    assert_kind_of Hash, remote_options
+    assert_equal "http://astronomical.joe", remote_options[:base_uri]
+    assert_equal :json, remote_options[:params][:format]
   end
 end
 

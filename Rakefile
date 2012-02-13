@@ -31,7 +31,7 @@ namespace :spec do
 
     desc "Run all specs and open the result in browser"
     task view: :'spec:simplecov' do
-      sh 'open coverage/index.html'
+      system 'gnome-open coverage/index.html'
     end
   end
 end
