@@ -1,15 +1,5 @@
 require 'bundler'
-require 'rake/testtask'
-
 Bundler::GemHelper.install_tasks
-
-# Rake::TestTask.new do |t|
-#   t.libs << 'test'
-# end
-
-# desc "Run tests"
-# task :default => :test
-
 
 require 'rspec/core/rake_task'
 RSpec::Core::RakeTask.new(:spec)
@@ -31,7 +21,7 @@ namespace :spec do
 
     desc "Run all specs and open the result in browser"
     task :view => :'spec:simplecov' do
-      system 'gnome-open coverage/index.html'
+      system 'open coverage/index.html'
     end
   end
 end
