@@ -1,13 +1,18 @@
 require 'test_helper'
 
 class TestDefineRemoteMethod < Test::Unit::TestCase
-
   def test_path_interpolation
     remote_method = Orthrus::RemoteMethod.new
     args = { :id => 4, :child => 2, :another => 3 }
     interpolated  = remote_method.interpolate('/some/:id/with/:child', args)
     assert_equal "/some/4/with/2", interpolated
-    assert_equal({ :another => 3 }, args)
+  end
+
+  def test_path_interpolation_twice
+    remote_method = Orthrus::RemoteMethod.new
+    args = { :id => 4, :child => 2, :another => 3 }
+    interpolated  = remote_method.interpolate('/some/:id/with/:child/and_another/:child', args)
+    assert_equal "/some/4/with/2/and_another/2", interpolated
   end
 
   def test_simple_remote_method_get

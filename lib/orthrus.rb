@@ -10,6 +10,12 @@ module Orthrus
   end
 
   module ClassMethods
+    # This hash contains all remote methods mapped from their symbol to the
+    # RemoteMethod instance.
+    def remote_methods
+      @remote_methods ||= {}
+    end
+
     # Getter for remote options
     # @return [RemoteOptions] the remote options for this class
     def remote_options
@@ -28,28 +34,30 @@ module Orthrus
     # of the parent class.
     def inherited(child)
       child.__send__(:remote_defaults, remote_options)
+      child.__send__(:remote_methods).update(remote_methods)
     end
 
     # Declare a remote method and create a class method as wrapper
     # @param [Symbol] name of the remote method
     # @param [Hash] options for the remote method
     def define_remote_method(name, options = {})
-      @remote_methods ||= {}
-      @remote_methods[name] = RemoteMethod.new(remote_options.smart_merge(options))
+      remote_methods[name.to_sym] =
+        RemoteMethod.new(remote_options.smart_merge(options))
+    end
 
-      class_eval <<-SRC
-        def self.#{name.to_s}(args = {})
-          call_remote_method(:#{name.to_s}, args)
-        end
-      SRC
+    def respond_to?(method_name)
+      !remote_methods[method_name.to_sym].nil?
     end
 
     # Find the specified remote method and pass the arguments
     # @param [Symbol] method_name to identify the remote method
     # @param [Hash] args to pass through
-    def call_remote_method(method_name, args)
-      remote_method = @remote_methods[method_name]
-      remote_method.run(args)
+    def method_missing(method_name, *args)
+      if remote_method = remote_methods[method_name]
+        remote_method.run(args.first || {})
+      else
+        super
+      end
     end
   end
 end
