@@ -2,10 +2,9 @@ require 'spec_helper'
 
 describe Orthrus::RemoteMethod do
 
-  it "should set needed values on prepare" do
+  it "should set up remote options on initialize" do
     method = Orthrus::RemoteMethod.new(:path => '/foo', :base_uri => 'http://foo.com')
-    method.prepare_method
-    method.options.should be_kind_of Orthrus::RemoteOptions
+    method.remote_options.should be_kind_of Orthrus::RemoteOptions
   end
 
   it "should interpolate the path" do

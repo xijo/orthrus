@@ -16,40 +16,44 @@ module Orthrus
       @remote_options ||= RemoteOptions.new
     end
 
+    def remote_methods
+      @remote_methods ||= {}
+    end
+
     # If we get subclassed, make sure that child inherits the remote defaults
     # of the parent class.
     def inherited(child)
-      child.instance_variable_set :@remote_options, @remote_options.dup_with_stack
+      child.instance_variable_set :@remote_options, remote_options.clone
     end
 
     # Declare a remote method and create a class method as wrapper
     # @param [Symbol] name of the remote method
     # @param [Hash] options for the remote method
     def define_remote_method(name, options = {}, &block)
-      method_options = remote_options.dup_with_stack
+      method_options = remote_options.clone
       method_options.stack << options unless options.empty?
       method_options.stack << block if block_given?
 
-      @remote_methods ||= {}
-      @remote_methods[name] = RemoteMethod.new(method_options)
+      remote_methods[name] = RemoteMethod.new(method_options)
+    end
 
+    def method_missing(method_name, *args)
+      if remote_method = remote_methods[method_name]
+        remote_method.run(args.first || {})
+      else
+        super
+      end
+    end
 
-      # FIXME define_method(name) do |args|
-      #   call_remote_method(name, args)
-      # end
-      class_eval <<-SRC
-        def self.#{name.to_s}(args = {})
-          call_remote_method(:#{name.to_s}, args)
-        end
-      SRC
+    def respond_to?(method_name)
+      super || !remote_methods[method_name.to_sym].nil?
     end
 
     # Find the specified remote method and pass the arguments
     # @param [Symbol] method_name to identify the remote method
     # @param [Hash] args to pass through
     def call_remote_method(method_name, args = {})
-      remote_method = @remote_methods[method_name]
-      remote_method.run(args)
+      remote_methods[method_name].run(args)
     end
 
     # Define default settings for the remote connection.
@@ -57,8 +61,8 @@ module Orthrus
     # @param [Hash] options to be set as default
     # @return [Hash] the current remote default settings
     def remote_method_defaults(args = {}, &block)
-      remote_options.stack << args unless args.empty?
-      remote_options.stack << block if block_given?
+      remote_options.push args unless args.empty?
+      remote_options.push block if block_given?
       remote_options
     end
     # TODO Alias this for backwards compatibility

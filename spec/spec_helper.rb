@@ -31,13 +31,23 @@ RSpec.configure do |config|
   end
 end
 
-class Planet
+class CelestialObject
   include Orthrus
 
   remote_method_defaults do |config|
-    config.http     = { :authentication => "Basic authentication" }
     config.base_uri = "http://astronomy.test"
+    config.http     = { :authentication => "Basic authentication" }
   end
+end
+
+class Comet < CelestialObject
+  include Orthrus
+
+  remote_method_defaults :base_uri => 'http://astronomy.test/comets'
+end
+
+class Planet < CelestialObject
+  include Orthrus
 
   remote_method_defaults :params => { :format => "json" }
 
@@ -47,12 +57,6 @@ class Planet
   end
 
   define_remote_method :all, :path => 'planets'
-end
-
-class Rock < Planet
-  include Orthrus
-
-  remote_method_defaults :base_uri => 'http://astronomy.test/rocks'
 end
 
 # class Biology < Astronomy
