@@ -11,7 +11,7 @@ module Orthrus
 
     def prepare_options(args)
       remote_options.push(args)
-      options = remote_options.build
+      options = remote_options.clone.build
       options[:method] ||= :get
       self.on_success = options[:on_success] || lambda { |response| response }
       self.on_failure = options[:on_failure] || lambda { |response| response }
@@ -20,7 +20,6 @@ module Orthrus
     end
 
     def prepare_url(options)
-      puts options.inspect
       base_uri = options.delete(:base_uri)
       path     = options.delete(:path) || ""
       interpolate(base_uri + path, options)
