@@ -65,7 +65,7 @@ module Orthrus
       remote_options.push block if block_given?
       remote_options
     end
-    # TODO Alias this for backwards compatibility
-    # alias remote_options remote_method_defaults
+    # Alias this for backwards compatibility
+    alias_method :remote_defaults, :remote_method_defaults
   end
 end

@@ -3,7 +3,6 @@ require 'spec_helper'
 describe Orthrus do
 
   it "should set remote default options" do
-    puts  Planet.instance_variable_get(:@remote_options)
     options = Planet.instance_variable_get(:@remote_options).build
     options[:base_uri].should == "http://astronomy.test"
     options[:http].should == { :authentication => 'Basic authentication' }
