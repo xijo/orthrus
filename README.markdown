@@ -7,7 +7,7 @@ He was charged with guarding Geryon's herd of red cattle in Erytheia.
 
 ## Typhoeus
 
-Thanks to the guys who are developing Typhoeus (http://github.com/dbalatero/typhoeus)
+Thanks to the guys who are developing Typhoeus (http://github.com/typhoeus/typhoeus)
 
 Orthrus is a small extension inspired by the original remote method API from Paul Dix
 which is deprecated in the current Typhoeus release.
