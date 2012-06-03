@@ -24,7 +24,7 @@ RSpec.configure do |config|
     @error_response = Typhoeus::Response.new(:code => 404, :body => '{ "eris" : "is no planet but a TNO" }', :time => 0.3)
     @put_response   = Typhoeus::Response.new(:code => 403, :body => 'Creating planets is not your business!', :time => 0.3)
     hydra.stub(:get, "http://astronomy.test/planets").and_return(@index_response)
-    hydra.stub(:get, "http://astronomy.test/planets/mars").and_return(@mars_response)
+    hydra.stub(:get, %r[http://astronomy.test/planets/mars]).and_return(@mars_response)
     hydra.stub(:get, "http://astronomy.test/planets/moon").and_return(@moon_response)
     hydra.stub(:get, "http://astronomy.test/planets/eris").and_return(@error_response)
     hydra.stub(:put, "http://astronomy.test/planets").and_return(@put_response)
@@ -35,7 +35,7 @@ class CelestialObject
   include Orthrus
 
   remote_method_defaults do |config|
-    config.base_uri = "http://astronomy.test"
+    config.base_uri = "http://astronomy.test/"
     config.http     = { :authentication => "Basic authentication" }
   end
 end
@@ -58,9 +58,3 @@ class Planet < CelestialObject
 
   define_remote_method :all, :path => 'planets'
 end
-
-# class Biology < Astronomy
-#   remote_defaults :base_uri => "http://biological.test",
-#                   :params   => { :boring => false }
-# end
-
