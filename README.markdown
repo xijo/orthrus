@@ -15,9 +15,7 @@ which is deprecated in the current Typhoeus release.
 It can be used to encapsulate remote method calls in a clean way and provide an
 easy interface to work with. All of its functionality is covered by tests as well.
 
-![orthrus build status][1]
-
- [1]:http://travis-ci.org/xijo/orthrus.png
+[![Build Status](https://secure.travis-ci.org/xijo/orthrus.png?branch=master)](https://travis-ci.org/xijo/orthrus) [![Gem Version](https://badge.fury.io/rb/orthrus.png)](http://badge.fury.io/rb/orthrus)
 
 ## Installation
 
